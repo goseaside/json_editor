@@ -1,0 +1,126 @@
+<!Doctype html>
+<html xmlns=http://www.w3.org/1999/xhtml>
+    <head>
+        <meta http-equiv=Content-Type content="text/html;charset=utf-8">
+        <title> JSON Editor </title>
+        
+        <style>
+        a{text-decoration:none}
+        a:hover{text-decoration:underline}
+        *{font-size:12px;}
+        </style>
+            
+        <script src="http://libs.baidu.com/jquery/1.9.0/jquery.js"></script>
+    </head>
+
+
+
+
+<style>
+ul {background-color:pink; margin:8px; }
+</style>
+
+<script>
+d0 = {
+    't': 1,
+    't2': 'helo',
+    't_a': { 'a': 'helo', 'b': 2 },
+    't_b': { 'k': 'helo', 'j': 2 },
+    't6': 'helo'
+};
+
+g_li_count = 0;
+g_changes = {};
+
+function step_json(j, base)
+{
+    s = '<ul>';
+    for(i in j)
+    {
+        if(i == '__') return ' ** 没有找到相关信息 ** ';
+        
+        o = j[i];
+        
+        if(typeof(o) == 'object') s += "<li>" + i + "</li>" + step_json(o, base + '['+i+']');
+        else 
+        {
+            g_li_count ++;
+            s += "<li>" + i
+                + ": <span class='edit-li' dh='" + base + '['+i+']' +"' id='o_li_" + g_li_count + "'>" + o + "</span>"
+                + "</li>";
+        }
+    }
+    s += "</ul>";
+    
+    return s;
+}
+
+</script>
+
+<div>
+  &nbsp;&gt; JSON 编辑器
+</div>
+
+<div style="width:680px;">
+<script>
+//
+document.write( step_json(d0, '') );
+
+function save_it(v)
+{
+    var v2 = $('#t_' + v).val();
+    
+    var o = $('#' + v);
+    o.html(v2).show();
+    
+    $('#t_' + v).remove(); $('#b_' + v).remove(); $('#k_' + v).remove();
+    
+    g_changes[o.attr('dh')] = v2;
+    
+    return false;
+}
+function forget_it(v)
+{
+    $('#' + v).show();
+    
+    $('#t_' + v).remove(); $('#b_' + v).remove(); $('#k_' + v).remove();
+    
+    return false;
+}
+
+function step_li_items()
+{
+    $('.edit-li').click( function() {
+        id = $(this).attr('id');
+        
+        var o = $(this);
+        var v = o.html();
+        o.hide();
+    
+        var s = '<input id="t_' + id+ '" value="' + v + '">'
+            + '<input id="b_' + id+ '" type="button" onclick="javascript:save_it(\''+id+'\')" value="保存">'
+            + '<input id="k_' + id+ '" type="button" onclick="javascript:forget_it(\''+id+'\')" value="取消">';
+            
+        $(s).insertAfter(o);
+        
+        // Select the text for edit
+        $('#t_' + id).select();
+        
+        });
+}
+
+$(document).ready(function() {
+    step_li_items()
+    } 
+);
+</script>
+
+</div>
+
+
+<input type="button" 
+    onclick="javascript:alert(JSON.stringify(g_changes))" 
+    value="改了哪里？">
+
+</body>
+</html>
